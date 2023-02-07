@@ -51,4 +51,6 @@
        </div>
         <button type="submit" class="btn btn-primary">Inscription</button>
     </form>
+
+    <p><a href="{{ route('login') }}">J'ai déjà un compte</a></p>
 </div>

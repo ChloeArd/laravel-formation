@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ForgotController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ResetController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,19 +20,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [ArticleController::class, "index"]);
 
 Route::get('register', [RegisterController::class, 'index'])->name('register');
 Route::get('login', [LoginController::class, "index"])->name('login');
+Route::get('logout', [LogoutController::class, 'logout'])->name('logout');
+Route::get('forgot', [ForgotController::class, 'index'])->name('forgot');
+
+Route::get("reset/{token}", [ResetController::class, "index"])->name("reset");
+Route::post('reset', [ResetController::class, 'reset'])->name("post.reset");
 
 Route::post('register', [RegisterController::class, "register"])->name('post.register');
 Route::post('login', [LoginController::class, "login"])->name('post.login');
+Route::post('forgot', [ForgotController::class, "login"])->name('post.forgot');
 
-Route::get('/profile/{username}', [UserController::class, 'profile'])->name('user.profile');
+Route::get('/profile/{user}', [UserController::class, 'profile'])->name('user.profile');
 
-Route::resource('articles', ArticleController::class);
+Route::resource('articles', ArticleController::class)->except('index');
 
 Route::get('profile/{firstname}/{lastname}', function($firstname = null, $lastname = null) {
 //    return view('profile.index')->with(compact('firstname', 'lastname'));
