@@ -15,6 +15,7 @@
         <a href="{{ route("login") }}">Connexion</a>
         <a href="{{ route("register") }}">Inscription</a>
     @else
+        <a href="{{ route('user.edit') }}">Mon compte</a>
         <a href="{{ route('articles.create') }}">Ajouter un article</a>
         <a href="{{ route("logout") }}">Déconnexion</a>
     @endif

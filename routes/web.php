@@ -28,6 +28,9 @@ Route::get('login', [LoginController::class, "index"])->name('login');
 Route::get('logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('forgot', [ForgotController::class, 'index'])->name('forgot');
 
+Route::get('user/edit', [UserController::class, 'edit'])->name('user.edit');
+Route::post('user/store', [UserController::class, 'store'])->name('post.user');
+
 Route::post('comment/{article}', [CommentController::class, 'store'])->name('post.comment');
 
 Route::get("reset/{token}", [ResetController::class, "index"])->name("reset");
