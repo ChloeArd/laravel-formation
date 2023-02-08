@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ForgotController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
@@ -26,6 +27,8 @@ Route::get('register', [RegisterController::class, 'index'])->name('register');
 Route::get('login', [LoginController::class, "index"])->name('login');
 Route::get('logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('forgot', [ForgotController::class, 'index'])->name('forgot');
+
+Route::post('comment/{article}', [CommentController::class, 'store'])->name('post.comment');
 
 Route::get("reset/{token}", [ResetController::class, "index"])->name("reset");
 Route::post('reset', [ResetController::class, 'reset'])->name("post.reset");

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -46,7 +47,7 @@ class ArticleController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
@@ -69,24 +70,45 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param ArticleRequest $request
+     * @return Response
      */
-    public function store(Request $request)
+    public function store(ArticleRequest $request)
     {
-        request()->validate([
-            'title' => ['required', 'max:20', 'unique:articles, title'],
-            'content' => ['required'],
-            'category' => ['sometimes', 'nullable', 'exists:categories, id']
-        ]);
+        $validatedData = $request->validated();
+        $validatedData['category_id'] = request('category', null);
+         Auth::user()->articles()->create($validatedData);
 
-        $article = new Article;
-        $article->user_id = Auth::id();
-        $article->category_id = request('category', null);
-        $article->title = request('title');
-        $article->slug = Str::slug($article->title);
-        $article->content = request('content');
-        $article->save();
+//        $article = Article::user()->articles()->create(request()->validate([
+//            'title' => ['required', 'max:20', 'unique:articles,title'],
+//            'content' => ['required'],
+//            'category' => ['sometimes', 'nullable', 'exists:categories,id']
+//        ]
+////        [
+////            'title.required' => "Il n'y a pas de titre !", // Permet d'afficher nous meme un message d'erreur pour required
+////            'title.max' => "Trop long !",
+////            'content.required' => "C'est requis ! "
+////        ]
+//        ));
+//
+//        $article->category_id = request('category', null);
+//        $article->save();
+
+//        $article = Article::create([
+//            'user_id' => auth()->id(),
+//            "title" => request("title"),
+//            "slug" => Str::slug(request("slug")),
+//            "content" => request('content'),
+//            "category_id" => request("category", null)
+//        ]);
+
+//        $article = new Article;
+//        $article->user_id = Auth::id();
+//        $article->category_id = request('category', null);
+//        $article->title = request('title');
+//        $article->slug = Str::slug($article->title); // string
+//        $article->content = request('content');
+//        $article->save();
 
         $success = "Article ajouté";
         return back()->withSuccess($success);
@@ -103,7 +125,8 @@ class ArticleController extends Controller
         $data = [
             'title' => $article->title . " - " . config('app.name'),
             'description' => $article->title . ". " . Str::words($article->content, 10),
-            'article' => $article
+            'article' => $article,
+            'comments' => $article->comments()->orderByDesc('created_at')->get()
         ];
 
         return view('article.show', $data);
@@ -112,34 +135,59 @@ class ArticleController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Article $article
+     * @return void
      */
-    public function edit($id)
+    // Affichage du formulaire d'edition avec les données de l'article
+    public function edit(Article $article)
     {
-        //
+        // Vérifie si l'utilisateur connecté est celui qui a créer l'article sinon erreur 403
+        abort_if(auth()->id() != $article->user_id, 403 );
+
+        $data = [
+            'title' => $description = "Mise à jour de " . $article->title,
+            'description' => $description,
+            'article' => $article,
+            'categories' => Category::get()
+        ];
+
+        return view('article.edit', $data);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function update(Request $request, $id)
+    // Mise à jour de l'article en BDD
+    public function update(ArticleRequest $request, Article $article)
     {
-        //
+        $validatedData = $request->validated();
+        $validatedData['category_id'] = request('category', null);
+
+        $article = Auth::user()->articles()->updateOrCreate(['id' => $article->id], $validatedData); // si il trouve l'article il le met a jour sinon il le crée
+
+        $success = "Article modifié";
+        return redirect()->route('article.edit', ['article' => $article->slug])->withSuccess($success);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function destroy($id)
+    // Supprimer un article
+    public function destroy(Article $article)
     {
-        //
+        abort_if(auth()->id() != $article->user_id, 403);
+
+        $article->delete();
+
+        $success = "Article supprimé !";
+
+        return back()->withSuccess($success);
     }
 }

@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Ajouter un article</title>
+    <title>Modifier un article</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body>
@@ -22,21 +22,23 @@
     </div>
 
     <div class="card-header">
-        Ajouter un article
+        Modifier un article
     </div>
 
-    <form action="{{ route('articles.store') }}" method="post">
+    <form action="{{ route('articles.update', ['article' => $article->slug]) }}" method="post">
+
+        @method("PUT")
         @csrf
         <div class="form-group">
             <label for="title">Titre</label>
-            <input type="text" class="form-control" name="title" id="title" value="{{old('title')}}">
+            <input type="text" class="form-control" name="title" id="title" value="{{old('title', $article->title)}}">
             @error('title')
             <div>{{ $message }}</div>
             @enderror
         </div>
         <div class="form-group">
             <label for="content">Contenu</label>
-            <textarea name="content" id="content" placeholder="Contenu de l'article...">{{old('content')}}</textarea>
+            <textarea name="content" id="content" placeholder="Contenu de l'article...">{{old('content', $article->content)}}</textarea>
             @error('content')
             <div>{{ $message }}</div>
             @enderror
@@ -47,9 +49,9 @@
                 <option value=""></option>
                 @foreach($categories as $acategory)
                     <option value="{{ $category->id }}"
-                    @if(old('category') == $category->id)
-                        selected
-                    @endif
+                            @if(old('category', $article->category_id ?? "") == $category->id)
+                                selected
+                        @endif
 
                     >{{ $category->name }}</option>
                 @endforeach
