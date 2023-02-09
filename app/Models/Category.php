@@ -9,6 +9,10 @@ class Category extends Model
 {
     use HasFactory;
 
+    public function getRouteKeyName() {
+        return 'slug';
+    }
+
     //plusieurs articles peuvent appartenir à la meme categorie
     public function articles() {
         return $this->hasMany(Article::class);

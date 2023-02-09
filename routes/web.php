@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ForgotController;
 use App\Http\Controllers\LoginController;
@@ -28,7 +29,14 @@ Route::get('login', [LoginController::class, "index"])->name('login');
 Route::get('logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('forgot', [ForgotController::class, 'index'])->name('forgot');
 
+Route::get('category/{category}', [CategoryController::class, 'show'])->name('category.show');
+
 Route::get('user/edit', [UserController::class, 'edit'])->name('user.edit');
+
+Route::get('user/password', [UserController::class, 'password'])->name('user.password');
+
+Route::get('password', [UserController::class, 'updatePassword'])->name('update.password');
+
 Route::post('user/store', [UserController::class, 'store'])->name('post.user');
 
 Route::post('comment/{article}', [CommentController::class, 'store'])->name('post.comment');
@@ -42,35 +50,37 @@ Route::post('forgot', [ForgotController::class, "login"])->name('post.forgot');
 
 Route::get('/profile/{user}', [UserController::class, 'profile'])->name('user.profile');
 
+Route::delete('destroy/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+
 Route::resource('articles', ArticleController::class)->except('index');
 
-Route::get('profile/{firstname}/{lastname}', function($firstname = null, $lastname = null) {
-//    return view('profile.index')->with(compact('firstname', 'lastname'));
-
-    return view('profile.index', [
-        'title'=> "Mon titre",
-        'description' => 'Une description',
-        'firstname' => $firstname,
-        "lastname" => $lastname
-    ]);
-});
-
-Route::get('test', function () {
-    return view('test');
-});
-
-Route::get('test2', function () {
-    return view('test2')->withTitle('PHP');
-});
-
-Route::get("structures", function () {
-    $fruits = ["pomme", "orange", "citron", "fraise", "mûre"];
-    $data = [
-        'number' => 5,
-        'fruits' => $fruits
-    ];
-   return view('structures', $data);
-});
+//Route::get('profile/{firstname}/{lastname}', function($firstname = null, $lastname = null) {
+////    return view('profile.index')->with(compact('firstname', 'lastname'));
+//
+//    return view('profile.index', [
+//        'title'=> "Mon titre",
+//        'description' => 'Une description',
+//        'firstname' => $firstname,
+//        "lastname" => $lastname
+//    ]);
+//});
+//
+//Route::get('test', function () {
+//    return view('test');
+//});
+//
+//Route::get('test2', function () {
+//    return view('test2')->withTitle('PHP');
+//});
+//
+//Route::get("structures", function () {
+//    $fruits = ["pomme", "orange", "citron", "fraise", "mûre"];
+//    $data = [
+//        'number' => 5,
+//        'fruits' => $fruits
+//    ];
+//   return view('structures', $data);
+//});
 
 //Route::get('articles', function () {
 //   $articles = ['Articles A', "Articles B", "Article C"];

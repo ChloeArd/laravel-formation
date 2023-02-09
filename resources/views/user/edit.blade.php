@@ -58,5 +58,12 @@
         <button type="submit" class="btn btn-primary">Envoyer</button>
     </form>
 
-    <p><a href="">Modifier mon mot de passe</a></p>
+    <p><a href="{{ route("user.password") }}">Modifier mon mot de passe</a></p>
+    <div>
+        <form action="{{ route('user.destroy', ['user' => $user->id])  }}" method="post">
+            @method("DELETE")
+            @csrf
+            <button type="submit">Supprimer</button>
+        </form>
+    </div>
 </div>

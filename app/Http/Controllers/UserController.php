@@ -20,7 +20,15 @@ class UserController extends Controller
 
     public function profile(User $user)
     {
-        return "Je suis un utilisateur et mon nom est " . $user->name;
+        $data = [
+            'title' => "Profil de " . $user->name,
+            'description' => $user->name . " est inscrit depuis le " . $user->created_at->isoFormat("LL") . "et à posté " . $user->articles()->count() . " article(s)",
+            'user' => $user,
+            'articles' => $user->articles()->withCount('comments')->orderByDesc('comments_count')->paginate(2)
+        ];
+        // withCount() -> permet de compter le nombre de commentaire pour chaque article et s'ajoute dans le tableau de l'article
+
+        return view('user.profile', $data);
     }
 
     // Formulaire de mise à jour des informations du user connecté
@@ -33,6 +41,34 @@ class UserController extends Controller
         ];
 
         return view('user.edit', $data);
+    }
+
+    // Formulaire de changement de mot de passe
+    public function password() {
+        $data = [
+            'title' => $description = "Modifier mon mot de passe",
+            'description' => $description,
+            'user' => auth()->user()
+        ];
+
+        return view('user.password', $data);
+    }
+
+    // Mise à jour du mot de passe
+    public function updatePassword() {
+        request()->validate([
+           'current' => 'required|password', // password -> verifie si les 2 password sont identiques
+           'password' => 'required|between:9,20|confirmed'
+        ]);
+
+        $user = auth()->user();
+
+        $user->password = bcrypt(request('password'));
+        $user->save();
+
+        $success = "Mot de passe mis à jour !";
+
+        return back()->withSuccess($success);
     }
 
     // Sauvegarde des informations sur l'utilisateur
@@ -90,5 +126,19 @@ class UserController extends Controller
 
         $success = "Informations mises à jour.";
         return back()->withSuccess($success);
+    }
+
+    // L'utilisateur peut supprimer son compte
+    public function destroy(User $user)
+    {
+        // delete le user et son image de profil
+
+        abort_if($user->id != auth()->id(), 403);
+        Storage::deleteDirectory("avatars/" . $user->id); // Supprime la photo
+
+        $user->delete();
+
+        $success = "Utilisateur supprimé";
+        return redirect("/")->withSuccess($success);
     }
 }
